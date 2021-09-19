@@ -263,5 +263,5 @@ def print_error(val):
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
+    app.run(host='0.0.0.0', port=80)
     keystone_execute(KS_ARCH_X86, KS_MODE_16, b"add eax, ecx")
