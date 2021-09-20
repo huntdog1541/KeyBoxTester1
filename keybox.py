@@ -2,12 +2,9 @@ from keystone import *
 import sys
 from flask import *
 import json
+import pprint
 
 app = Flask(__name__)
-
-
-def debug_mode():
-    return True
 
 
 ks_arch_dict = {
@@ -150,10 +147,6 @@ class KeystoneError(KsError):
 @app.route('/api', methods=['GET', 'POST'])
 def get_assembly():
     json_request = request.get_json()
-
-    if debug_mode():
-        print('Request from server: %s ' % json_request)
-
     result, val = validate_input(json_request)
 
     if result:
@@ -271,6 +264,24 @@ def print_error(val):
     return message
 
 
+#Borrowed from StackOverflow to debug the application: https://stackoverflow.com/questions/25466904/print-raw-http-request-in-flask-or-wsgi
+
+class LoggingMiddleware(object):
+    def __init__(self, app):
+        self._app = app
+
+    def __call__(self, env, resp):
+        errorlog = env['wsgi.errors']
+        pprint.pprint(('REQUEST', env), stream=errorlog)
+
+        def log_response(status, headers, *args):
+            pprint.pprint(('RESPONSE', status, headers), stream=errorlog)
+            return resp(status, headers, *args)
+
+        return self._app(env, log_response)
+
+
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=80)
+    app.wsgi_app = LoggingMiddleware(app.wsgi_app)
+    app.run(debug=True, host='0.0.0.0', port=80)
     keystone_execute(KS_ARCH_X86, KS_MODE_16, b"add eax, ecx")
