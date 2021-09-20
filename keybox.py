@@ -281,6 +281,12 @@ class LoggingMiddleware(object):
         return self._app(env, log_response)
 
 
+@app.before_request
+def log_request():
+    app.logger.debug("Request Headers %s", request.headers)
+    return None
+
+
 if __name__ == '__main__':
     app.wsgi_app = LoggingMiddleware(app.wsgi_app)
     app.run(debug=True, host='0.0.0.0', port=80)
