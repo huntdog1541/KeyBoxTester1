@@ -5,6 +5,11 @@ import json
 
 app = Flask(__name__)
 
+
+def debug_mode():
+    return True
+
+
 ks_arch_dict = {
     "X86": KS_ARCH_X86,
     "ARM": KS_ARCH_ARM,
@@ -145,6 +150,10 @@ class KeystoneError(KsError):
 @app.route('/api', methods=['GET', 'POST'])
 def get_assembly():
     json_request = request.get_json()
+
+    if debug_mode():
+        print('Request from server: %s ' % json_request)
+
     result, val = validate_input(json_request)
 
     if result:
